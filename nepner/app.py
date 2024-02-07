@@ -1,27 +1,27 @@
+import json
+import os
 from transformers import pipeline
-from fastapi import FastAPI
-from pydantic import BaseModel
 
-# Run the server as 
-# uvicorn app:app --reload
+model_dir = os.getenv('MODEL_DIR', "/mnt/ml/models/")
 
-# Initialize FastAPI instance
-app = FastAPI(title='Deploying a LLM Model with FastAPI')
+def lambda_handler(event, context):
 
-class Text(BaseModel):
-    sentence: str
-
-@app.get("/")
-def home():
-    return "Hello we are going to deploy LLM in production!!"
-
-@app.post("/predict") 
-def prediction(text: Text):
+    # Reading the body to extract the URL and the language 
+    body = json.loads(event['body'])
+    
     token_classifier = pipeline(
-        "token-classification", model='./model/xlm-roberta-large', aggregation_strategy="simple"
+        "token-classification", model=os.path.join(model_dir, 'xlm-roberta-large'), aggregation_strategy="simple"
     )
-    results = token_classifier(text.sentence)
-    ret_val = {}
+    results = token_classifier(body.sentence)
+    response = {}
     for each_entity in results:
-        ret_val[each_entity['word']] = each_entity['entity_group']
-    return ret_val
+        response[each_entity['word']] = each_entity['entity_group']
+    
+    # Logging the response in the logs
+    print(f"Here is the formated output {response}")
+    
+    # Function Return 
+    return {
+        'statusCode': 200,
+        'body': json.dumps(response)
+    }
