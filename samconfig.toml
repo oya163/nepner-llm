@@ -1,0 +1,11 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "nepner-llm"
+resolve_s3 = true
+s3_prefix = "nepner-llm"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = "SrcBucket=\"oyashi-ml-bucket\""
+image_repositories = ["InferenceFunction=085230931441.dkr.ecr.us-east-1.amazonaws.com/nepnerllm666765ac/inferencefunction7c73919drepo"]
